@@ -16,22 +16,15 @@ class SignupView(APIView):
         if serializer.is_valid():
             try:
                 user = serializer.save()
+                user_serialized = CustomUserSerializer(user)
             except ValueError as e:
 
                 return Response({"Error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
             response_data = {
                 "message": "User created successfully",
-                "user": {
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "email": user.email,
-                    "profile": {
-                        "Bio": user.profile.bio,
-                        "Location": user.profile.location,
-                        "Last_updated": user.profile.last_updated,
-                    }
+                "user": user_serialized.data
                 }
-            }
+
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -41,8 +34,14 @@ class LoginView(APIView):
 
     @staticmethod
     def post(request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+        email = request.data.get('email', None)
+        password = request.data.get('password', None)
+        if not email:
+
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not password:
+
+            return Response({'error': 'Password is required'}, status=status.HTTP_400_BAD_REQUEST)
         user = authenticate(request, email=email, password=password)
         if user is not None:
 

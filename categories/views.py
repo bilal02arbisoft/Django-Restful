@@ -23,7 +23,7 @@ class CategoryListCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryDetailView(APIView):
+class CategoryDetailUpdateView(APIView):
 
     def get(self, request, pk):
         category = get_object_or_404(Category, pk=pk)
@@ -39,7 +39,7 @@ class CategoryDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SubCategoryListCreateView(APIView):
+class SubCategoryByCategoryListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, category_id):
@@ -57,6 +57,14 @@ class SubCategoryListCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubCategoryListView(APIView):
+
+    def get(self, request):
+        subcategories = SubCategory.objects.all()
+        serializer = SubCategorySerializer(subcategories, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 class SubCategoryDetailView(APIView):

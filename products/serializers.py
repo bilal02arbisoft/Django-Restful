@@ -3,7 +3,7 @@ from products.models import Product, ProductVariant, Attribute, AttributeValue, 
 
 
 class AttributeValueSerializer(serializers.ModelSerializer):
-    author = serializers.CharField()
+    attribute = serializers.CharField()
 
     class Meta:
         model = AttributeValue
@@ -35,16 +35,6 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'name', 'description', 'price', 'stock', 'subcategory', 'has_variants', 'created_at', 'updated_at', 'variants')
         read_only_fields = ('id', 'created_at', 'updated_at')
-
-    def __init__(self, *args, **kwargs):
-        super(ProductSerializer, self).__init__(*args, **kwargs)
-
-        if self.instance and hasattr(self.instance, 'has_variants') and self.instance.has_variants:
-            self.fields.pop('price')
-            self.fields.pop('stock')
-        elif 'has_variants' in self.initial_data and self.initial_data['has_variants']:
-            self.fields['price'].required = False
-            self.fields['stock'].required = False
 
     def validate(self, data):
         has_variants = data.get('has_variants', False)

@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from users.models import CustomUser
+from users.models import CustomUser, Address, Profile
 
 
 class CustomUserAdmin(UserAdmin):
@@ -25,4 +25,16 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
 
 
+class AddressAdmin(admin.ModelAdmin):
+    model = Address
+    list_display = ('address_line_1', 'address_line_2', 'city', 'province', 'country', 'is_default')
+
+
+class ProfileAdmin(admin.ModelAdmin):
+    model = Profile
+    list_display = ('phone_number', 'date_of_birth', 'gender', 'last_updated')
+
+
+admin.site.register(Profile, ProfileAdmin)
+admin.site.register(Address, AddressAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)

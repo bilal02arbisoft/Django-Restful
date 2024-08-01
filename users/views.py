@@ -4,9 +4,17 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
-from users.serializers import CustomUserSerializer, PasswordChangeSerializer
+from users.serializers import CustomUserSerializer, PasswordChangeSerializer, AddressSerializer
 from django.utils import timezone
 from django.contrib.sessions.models import Session
+from users.models import Address, CustomUser
+
+
+class UsersListView(APIView):
+
+    def get(self, request):
+        users = CustomUserSerializer(CustomUser.objects.all(), many=True)
+        return Response(users.data)
 
 
 class SignupView(APIView):
@@ -27,6 +35,38 @@ class SignupView(APIView):
 
             return Response(response_data, status=status.HTTP_201_CREATED)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddressListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        addresses = Address.objects.filter(user=request.user)
+        serializer = AddressSerializer(addresses, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = AddressSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddressUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        try:
+            address = Address.objects.get(user=request.user, pk=pk)
+        except Address.DoesNotExist:
+            return Response({'error': 'Address not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AddressSerializer(address, data=request.data, context={'user': request.user}, partial=True)
+        if serializer.is_valid():
+            updated_address = serializer.save()
+            return Response(AddressSerializer(updated_address).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

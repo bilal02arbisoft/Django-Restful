@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import CustomUser, Profile
+from users.models import CustomUser, Profile, Address
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import check_password
 
@@ -7,11 +7,11 @@ from django.contrib.auth.hashers import check_password
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['bio', 'location', 'birth_date']
+        fields = ['phone_number', 'date_of_birth', 'gender']
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(required=False)
+    profile = ProfileSerializer()
 
     class Meta:
         model = CustomUser
@@ -22,13 +22,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
     def validate_email(value):
         if CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
-
         return value
 
     @staticmethod
     def validate_password(value):
         validate_password(value)
-
         return value
 
     def validate(self, data):
@@ -44,8 +42,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = CustomUser.objects.create_user(password=password, **validated_data)
+
+        profile_data = validated_data.pop('profile')
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            password=validated_data['password']
+        )
+        Profile.objects.create(user=user, **profile_data)
 
         return user
 
@@ -60,18 +65,43 @@ class CustomUserSerializer(serializers.ModelSerializer):
             if check_password(validated_data['email'], instance.password):
                 raise serializers.ValidationError(" Email cannot be the same as the password.")
 
-        profile_data = validated_data.pop('profile', None)
+        profile_data = {
+            'phone_number': validated_data.pop('phone_number', None),
+            'date_of_birth': validated_data.pop('date_of_birth', None),
+            'gender': validated_data.pop('gender', None)
+        }
+
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.email = validated_data.get('email', instance.email)
         instance.save()
 
-        if profile_data:
+        profile = instance.profile
+        profile.phone_number = profile_data.get('phone_number', profile.phone_number)
+        profile.date_of_birth = profile_data.get('date_of_birth', profile.date_of_birth)
+        profile.gender = profile_data.get('gender', profile.gender)
+        profile.save()
 
-            profile = instance.profile
-            profile.bio = profile_data.get('bio', profile.bio)
-            profile.location = profile_data.get('location', profile.location)
-            profile.save()
+        return instance
+
+
+class AddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = ['id', 'address_line_1', 'address_line_2', 'city', 'province',
+                  'country', 'is_default']
+        read_only_fields = ['id']
+
+    def update(self, instance, validated_data):
+
+        instance.address_line_1 = validated_data.get('address_line_1', instance.address_line_1)
+        instance.address_line_2 = validated_data.get('address_line_2', instance.address_line_2)
+        instance.city = validated_data.get('city', instance.city)
+        instance.province = validated_data.get('province', instance.province)
+        instance.country = validated_data.get('country', instance.country)
+        instance.is_default = validated_data.get('is_default', instance.is_default)
+        instance.save()
 
         return instance
 

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
+    'categories.apps.CategoriesConfig',
     'rest_framework',
 ]
 
@@ -80,8 +81,12 @@ WSGI_APPLICATION = 'basic_user_application.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ecommerce',
+        'USER': 'postgres',
+        'PASSWORD': '786allah',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

@@ -34,7 +34,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ('product', 'sku', 'price', 'stock')
+    list_display = ('id','product', 'sku', 'price', 'stock')
     search_fields = ('product__name', 'sku')
     list_filter = ('product',)
     inlines = [ProductVariantAttributeInline]

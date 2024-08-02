@@ -1,6 +1,5 @@
 from django.db import models
 from categories.models import SubCategory
-from django.core.exceptions import ValidationError
 
 
 class Product(models.Model):
@@ -19,6 +18,16 @@ class Product(models.Model):
     @property
     def category(self):
         return self.subcategory.category
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.has_variants and not self.variants.exists():
+
+            ProductVariant.objects.get_or_create(
+                product=self,
+                sku=f"{self.id}-default",
+                defaults={'price': self.price, 'stock': self.stock}
+            )
 
 
 class Attribute(models.Model):
@@ -43,7 +52,7 @@ class ProductVariant(models.Model):
     stock = models.IntegerField()
 
     def __str__(self):
-        return f"{self.product.name} - {self.sku}"
+        return f"{self.id}"
 
 
 class ProductVariantAttribute(models.Model):

@@ -24,7 +24,7 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductVariant
-        fields = ('sku', 'price', 'product', 'stock', 'variant_attributes')
+        fields = ('id', 'sku', 'price', 'product', 'stock', 'variant_attributes')
         read_only_fields = ['product']
 
 

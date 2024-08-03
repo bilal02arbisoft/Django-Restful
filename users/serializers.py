@@ -36,10 +36,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
         password = data.get('password')
         first_name = data.get('first_name')
         email = data.get('email')
-        if password and first_name and password == first_name:
+        if plain_password_equals_user_name(password, first_name):
 
             raise serializers.ValidationError("Password and first_name cannot be the same.")
-        if password and email and password == email:
+        if plain_password_equals_email( password, email):
 
             raise serializers.ValidationError("Password and email cannot be the same.")
 
@@ -124,20 +124,33 @@ class PasswordChangeSerializer(serializers.Serializer):
         new_password = data.get('new_password')
         user = self.context.get('user')
 
-        if not user.check_password(old_password):
+        if not check_password(user.password, old_password):
 
             raise serializers.ValidationError("Old password is incorrect.")
-        if new_password == user.email:
+        if plain_password_equals_email(new_password, user.email):
 
             raise serializers.ValidationError("New password cannot be the same as the email.")
-        if new_password == user.first_name:
+        if plain_password_equals_user_name(new_password, user.first_name):
 
             raise serializers.ValidationError("New password cannot be the same as the first name.")
-        if user.check_password(new_password):
+        if check_password(user.password, new_password):
 
             raise serializers.ValidationError("Pls use different password.")
 
         return data
+
+
+def plain_password_equals_email(password, email):
+
+    return password == email
+
+
+def plain_password_equals_user_name(password, first_name):
+
+    return password == first_name
+
+
+
 
 
 

@@ -14,6 +14,7 @@ class UsersListView(APIView):
 
     def get(self, request):
         users = CustomUserSerializer(CustomUser.objects.all(), many=True)
+
         return Response(users.data)
 
 
@@ -22,15 +23,11 @@ class SignupView(APIView):
     def post(request):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                user = serializer.save()
-                user_serialized = CustomUserSerializer(user)
-            except ValueError as e:
 
-                return Response({"Error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
             response_data = {
                 "message": "User created successfully",
-                "user": user_serialized.data
+                "user": serializer.data
                 }
 
             return Response(response_data, status=status.HTTP_201_CREATED)
@@ -44,13 +41,17 @@ class AddressListCreateView(APIView):
     def get(self, request):
         addresses = Address.objects.filter(user=request.user)
         serializer = AddressSerializer(addresses, many=True)
-        return Response(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = AddressSerializer(data=request.data)
         if serializer.is_valid():
+
             serializer.save(user=request.user)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -61,12 +62,14 @@ class AddressUpdateView(APIView):
         try:
             address = Address.objects.get(user=request.user, pk=pk)
         except Address.DoesNotExist:
+
             return Response({'error': 'Address not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = AddressSerializer(address, data=request.data, context={'user': request.user}, partial=True)
         if serializer.is_valid():
-            updated_address = serializer.save()
-            return Response(AddressSerializer(updated_address).data)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -98,6 +101,7 @@ class LogoutView(APIView):
     @staticmethod
     def post(request):
         logout(request)
+
         return Response({"message": "Logged out successfully"})
 
 
@@ -118,10 +122,9 @@ class UserProfileEditView(APIView):
         if serializer.is_valid():
 
             updated_instance = serializer.save()
-            updated_serializer = CustomUserSerializer(updated_instance)
             response_data = {
                 "message": "Successfully Updated the Profile",
-                "Profile:": updated_serializer.data
+                "Profile:": serializer.data
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
@@ -145,7 +148,7 @@ class PasswordChangeView(APIView):
             user.save()
             self._invalidate_user_sessions(user)
 
-            return Response({"detail": "Password has been changed successfully."}, status=status.HTTP_200_OK)
+            return Response({"message": "Password has been changed successfully."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

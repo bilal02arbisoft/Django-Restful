@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, ProductVariant, Attribute, AttributeValue, ProductVariantAttribute
+from products.models import Product, ProductVariant, Attribute, AttributeValue, ProductVariantAttribute
 
 
 class ProductVariantAttributeInline(admin.TabularInline):
@@ -21,14 +21,17 @@ class ProductAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.has_variants:
+
             return self.readonly_fields + ('price', 'stock')
         return self.readonly_fields
 
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj)
         if obj and obj.has_variants:
+
             fields.remove('price')
             fields.remove('stock')
+
         return fields
 
 

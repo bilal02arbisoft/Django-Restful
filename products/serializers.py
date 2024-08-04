@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from products.models import Product, ProductVariant, Attribute, AttributeValue, ProductVariantAttribute
+from products.models import (Product, ProductVariant, Attribute,
+                             AttributeValue, ProductVariantAttribute)
 
 
 class AttributeValueSerializer(serializers.ModelSerializer):
@@ -33,7 +34,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'price', 'stock', 'subcategory', 'has_variants', 'created_at', 'updated_at', 'variants')
+        fields = ('id', 'name', 'description', 'price', 'stock', 'subcategory',
+                  'has_variants', 'created_at', 'updated_at', 'variants')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
     def validate(self, data):
@@ -41,11 +43,15 @@ class ProductSerializer(serializers.ModelSerializer):
         price = data.get('price')
         stock = data.get('stock')
         if has_variants:
+
             if price is not None or stock is not None:
+
                 raise serializers.ValidationError("Products with variants should not have a price or stock directly.")
         else:
             if price is None or stock is None:
+
                 raise serializers.ValidationError("Products without variants must have a price and stock.")
+
         return data
 
     def create(self, validated_data):
@@ -53,6 +59,7 @@ class ProductSerializer(serializers.ModelSerializer):
         product = Product.objects.create(**validated_data)
 
         if variants_data:
+
             for variant_data in variants_data:
                 variant_attributes_data = variant_data.pop('variant_attributes')
                 variant = ProductVariant.objects.create(product=product, **variant_data)
@@ -62,29 +69,29 @@ class ProductSerializer(serializers.ModelSerializer):
                     attribute_name = attribute_value_data['attribute']
                     value = attribute_value_data['value']
                     attribute_instance, created = Attribute.objects.get_or_create(name=attribute_name)
-                    attribute_value_instance, created = AttributeValue.objects.get_or_create(attribute=attribute_instance, value=value)
+                    attribute_value_instance, created = AttributeValue.objects.get_or_create(attribute=
+                                                                                             attribute_instance,
+                                                                                             value=value)
                     ProductVariantAttribute.objects.create(variant=variant, attribute_value=attribute_value_instance)
 
         return product
 
     def update(self, instance, validated_data):
         variants_data = validated_data.pop('variants')
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-
         if variants_data:
 
             for variant_data in variants_data:
                 variant_id = variant_data.get('id')
                 if variant_id:
+
                     variant = ProductVariant.objects.get(id=variant_id, product=instance)
                     attributes_data = variant_data.pop('variant_attributes', [])
                     for attr, value in variant_data.items():
                         setattr(variant, attr, value)
                     variant.save()
-
                     for attribute_data in attributes_data:
                         attribute_value_data = attribute_data['attribute_value']
                         attribute, created = Attribute.objects.get_or_create(name=attribute_value_data['attribute'])

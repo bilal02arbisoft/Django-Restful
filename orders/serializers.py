@@ -16,6 +16,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         variant = validated_data.pop('variant')
         order_item = OrderItem.objects.create(variant=variant, **validated_data)
+
         return order_item
 
     def validate(self, data):
@@ -26,6 +27,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         if not product_variant.exists():
 
             raise serializers.ValidationError("Invalid variant_id provided")
+
         return data
 
 
@@ -42,7 +44,6 @@ class OrderSerializer(serializers.ModelSerializer):
         user = self.context['user']
         user = CustomUser.objects.get(pk=user.id)
         order = Order.objects.create(user=user)
-
 
         for item_data in items_data:
             variant = ProductVariant.objects.get(id=item_data['variant_id'])

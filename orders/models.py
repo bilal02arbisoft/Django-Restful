@@ -16,12 +16,8 @@ class Order(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return f"Order {self.id} - {self.user.first_name}"
 
-    # def save(self, *args, **kwargs):
-    #     if not self.total_price:
-    #         self.total_price = sum(item.total_price for item in self.items.all())
-    #     super().save(*args, **kwargs)
+        return f"Order {self.id} - {self.user.first_name}"
 
 
 class OrderItem(models.Model):
@@ -32,9 +28,11 @@ class OrderItem(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
+
         return f"OrderItem {self.id} - Order {self.order.id}"
 
     def save(self, *args, **kwargs):
         if not self.total_price:
+
             self.total_price = self.unit_price * self.quantity
         super().save(*args, **kwargs)

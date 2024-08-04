@@ -19,6 +19,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def __str__(self):
+
         return self.email
 
 
@@ -49,6 +50,7 @@ class Address(models.Model):
     is_default = models.BooleanField(default=False)
 
     def __str__(self):
+
         return f'{self.address_line_1}, {self.city}'
 
 

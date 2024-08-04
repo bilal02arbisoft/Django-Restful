@@ -25,8 +25,8 @@ class SubCategorySerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'id', 'name', 'description', 'category']
 
     def create(self, validated_data):
-
         subcategory = SubCategory.objects.create(category=self.context['category'], **validated_data)
+
         return subcategory
 
 

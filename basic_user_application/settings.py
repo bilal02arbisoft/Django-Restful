@@ -14,6 +14,7 @@ from pathlib import Path
 
 
 import users.apps
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +30,52 @@ SECRET_KEY = 'django-insecure-w5h3w5m-tgqa#octxs(mm&up_#$u&m6@2uix31#s-)6^8#bnj6
 DEBUG = True
 AUTH_USER_MODEL = 'users.CustomUser'
 ALLOWED_HOSTS = []
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
 
-# Application definition
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'django_restful.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'users': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -73,7 +118,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'basic_user_application.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

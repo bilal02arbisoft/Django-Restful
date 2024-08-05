@@ -1,21 +1,22 @@
-from django.contrib.auth import login, logout
-from rest_framework.response import Response
+import logging
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated
-from users.serializers import CustomUserSerializer, PasswordChangeSerializer, AddressSerializer
+from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from django.contrib.sessions.models import Session
-from users.models import Address, CustomUser
+from rest_framework.permissions import IsAuthenticated
+from users.serializers import CustomUserSerializer, AddressSerializer, PasswordChangeSerializer
+from users.models import CustomUser, Address
+
+logger = logging.getLogger('users')
 
 
 class UsersListView(APIView):
-
     def get(self, request):
         users = CustomUserSerializer(CustomUser.objects.all(), many=True)
 
-        return Response(users.data)
+        return Response(users.data, status=status.HTTP_200_OK)
 
 
 class SignupView(APIView):
@@ -28,9 +29,10 @@ class SignupView(APIView):
             response_data = {
                 "message": "User created successfully",
                 "user": serializer.data
-                }
+            }
 
             return Response(response_data, status=status.HTTP_201_CREATED)
+        logger.error(f"Validation errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -41,7 +43,6 @@ class AddressListCreateView(APIView):
     def get(self, request):
         addresses = Address.objects.filter(user=request.user)
         serializer = AddressSerializer(addresses, many=True)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -51,6 +52,7 @@ class AddressListCreateView(APIView):
             serializer.save(user=request.user)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.error(f"Validation errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -62,27 +64,33 @@ class AddressUpdateView(APIView):
         try:
             address = Address.objects.get(user=request.user, pk=pk)
         except Address.DoesNotExist:
+            logger.error(f"Address not found for user {request.user}")
 
             return Response({'error': 'Address not found'}, status=status.HTTP_404_NOT_FOUND)
-
         serializer = AddressSerializer(address, data=request.data, context={'user': request.user}, partial=True)
         if serializer.is_valid():
 
+            serializer.save()
+
             return Response(serializer.data, status=status.HTTP_200_OK)
+        logger.error(f"Validation errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
-
     @staticmethod
     def post(request):
         email = request.data.get('email', None)
         password = request.data.get('password', None)
         if not email:
 
+            logger.error("Email is required")
+
             return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
         if not password:
+
+            logger.error("Password is required")
 
             return Response({'error': 'Password is required'}, status=status.HTTP_400_BAD_REQUEST)
         user = authenticate(request, email=email, password=password)
@@ -91,6 +99,8 @@ class LoginView(APIView):
             login(request, user)
 
             return Response({"message": "Logged in successfully"}, status=status.HTTP_200_OK)
+
+        logger.critical("Invalid credentials")
 
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -121,13 +131,14 @@ class UserProfileEditView(APIView):
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
 
-            updated_instance = serializer.save()
+            serializer.save()
             response_data = {
                 "message": "Successfully Updated the Profile",
-                "Profile:": serializer.data
+                "Profile": serializer.data
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
+        logger.error(f"Validation errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -136,7 +147,6 @@ class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-
         return self.request.user
 
     def post(self, request, *args, **kwargs):
@@ -149,6 +159,7 @@ class PasswordChangeView(APIView):
             self._invalidate_user_sessions(user)
 
             return Response({"message": "Password has been changed successfully."}, status=status.HTTP_200_OK)
+        logger.error(f"Validation errors: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,7 +169,6 @@ class PasswordChangeView(APIView):
         for session in sessions:
             session_data = session.get_decoded()
             if user.pk == session_data.get('_auth_user_id'):
-
                 session.delete()
 
 

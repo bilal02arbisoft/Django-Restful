@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from users.managers import CustomUserManager
 from django.conf import settings
 from django.utils import timezone
+import logging
+
+logger = logging.getLogger('users')
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -21,6 +24,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
 
         return self.email
+
+    def save(self, *args, **kwargs):
+        logger.info(f'Saving user: {self.email}, {self.first_name} {self.last_name}')
+        super(CustomUser, self).save(*args, **kwargs)
 
 
 class Profile(models.Model):

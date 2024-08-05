@@ -39,14 +39,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if plain_password_equals_user_name(password, first_name):
 
             raise serializers.ValidationError("Password and first_name cannot be the same.")
-        if plain_password_equals_email( password, email):
+        if plain_password_equals_email(password, email):
 
             raise serializers.ValidationError("Password and email cannot be the same.")
 
         return data
 
     def create(self, validated_data):
-
         profile_data = validated_data.pop('profile')
         user = CustomUser.objects.create_user(
             email=validated_data['email'],

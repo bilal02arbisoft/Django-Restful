@@ -2,15 +2,16 @@ from django.contrib.auth import login, logout
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
 from users.serializers import CustomUserSerializer, PasswordChangeSerializer, AddressSerializer
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from users.models import Address, CustomUser
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UsersListView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         users = CustomUserSerializer(CustomUser.objects.all(), many=True)
@@ -73,36 +74,19 @@ class AddressUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginView(APIView):
-
-    @staticmethod
-    def post(request):
-        email = request.data.get('email', None)
-        password = request.data.get('password', None)
-        if not email:
-
-            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not password:
-
-            return Response({'error': 'Password is required'}, status=status.HTTP_400_BAD_REQUEST)
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-
-            login(request, user)
-
-            return Response({"message": "Logged in successfully"}, status=status.HTTP_200_OK)
-
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
-    @staticmethod
-    def post(request):
-        logout(request)
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
 
-        return Response({"message": "Logged out successfully"})
+            return Response("Logged out successfully", status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileEditView(APIView):

@@ -1,8 +1,7 @@
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from categories.models import Category, SubCategory
 from products.serializers import ProductSerializer
 from products.models import Product
@@ -17,6 +16,13 @@ class ProductListView(APIView):
 
 
 class ProductBySubCategoryView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'POST':
+
+            return [IsAuthenticated()]
+
+        return [AllowAny()]
+
     def get(self, request, subcategory_id):
         try:
             subcategory = SubCategory.objects.get(pk=subcategory_id)

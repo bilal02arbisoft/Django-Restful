@@ -8,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 @pytest.fixture
 def api_client():
+
     return APIClient()
 
 
@@ -17,6 +18,7 @@ def authenticated_client():
     user = CustomUser.objects.create_user(email='test@example.com', first_name='Test', last_name='User', password='password123')
     refresh = RefreshToken.for_user(user)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+
     return client
 
 

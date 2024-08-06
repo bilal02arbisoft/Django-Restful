@@ -4,7 +4,7 @@ from categories.views import (CategoryListCreateView, CategoryDetailUpdateView,
                               SubCategoryListView)
 
 urlpatterns = [
-    path('categories/', CategoryListCreateView.as_view(), name='categories-list-create'),
+    path('categories/', CategoryListCreateView.as_view(), name='categories_list_create'),
     path('categories/<int:pk>/', CategoryDetailUpdateView.as_view(), name='category-detail'),
     path('subcategories/<int:category_id>/', SubCategoryByCategoryListCreateView.as_view(), name='subcategories-list-create'),
     path('subcategories/', SubCategoryListView.as_view(), name='subcategory'),

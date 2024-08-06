@@ -1,13 +1,20 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from categories.models import Category, SubCategory
 from categories.serializers import CategorySerializer, SubCategorySerializer
 from django.shortcuts import get_object_or_404
 
 
 class CategoryListCreateView(APIView):
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+
+            return [IsAuthenticated()]
+
+        return [AllowAny()]
 
     def get(self, request):
         categories = Category.objects.all()
@@ -26,6 +33,13 @@ class CategoryListCreateView(APIView):
 
 
 class CategoryDetailUpdateView(APIView):
+
+    def get_permissions(self):
+        if self.request.method == 'PUT':
+
+            return [IsAuthenticated()]
+
+        return [AllowAny()]
 
     def get(self, request, pk):
         category = get_object_or_404(Category, pk=pk)
@@ -46,7 +60,12 @@ class CategoryDetailUpdateView(APIView):
 
 
 class SubCategoryByCategoryListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        if self.request.method == 'POST':
+
+            return [IsAuthenticated()]
+
+        return [AllowAny()]
 
     def get(self, request, category_id):
         category = Category.objects.get(id=category_id)
@@ -77,6 +96,13 @@ class SubCategoryListView(APIView):
 
 
 class SubCategoryDetailView(APIView):
+
+    def get_permissions(self):
+        if self.request.method == 'PUT':
+
+            return [IsAuthenticated()]
+
+        return [AllowAny()]
 
     def get(self, request, pk):
         subcategory = get_object_or_404(SubCategory, id=pk)

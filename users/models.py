@@ -3,13 +3,14 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from users.managers import CustomUserManager
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import EmailValidator, RegexValidator
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
 
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    email = models.EmailField(unique=True, validators=[EmailValidator()], null=False, blank=False)
+    first_name = models.CharField(max_length=30, null=False, blank=False)
+    last_name = models.CharField(max_length=30, null=False, blank=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -29,9 +30,10 @@ class Profile(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     ]
+    phone_number_validator = RegexValidator(regex=r'^\d{11}$', message="Phone number must be exactly 11 digits.")
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', on_delete=models.CASCADE)
     date_of_birth = models.DateField()
-    phone_number = models.CharField(max_length=11)
+    phone_number = models.CharField(max_length=11, validators=[phone_number_validator])
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     last_updated = models.DateTimeField(null=True, blank=True)
 

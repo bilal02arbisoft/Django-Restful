@@ -39,7 +39,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if plain_password_equals_user_name(password, first_name):
 
             raise serializers.ValidationError("Password and first_name cannot be the same.")
-        if plain_password_equals_email( password, email):
+        if plain_password_equals_email(password, email):
 
             raise serializers.ValidationError("Password and email cannot be the same.")
 

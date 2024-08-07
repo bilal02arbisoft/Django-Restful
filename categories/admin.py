@@ -1,6 +1,5 @@
 from categories.models import Category, SubCategory
 from django.contrib import admin
-from categories.models import Category
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -17,7 +16,3 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory, SubCategoryAdmin)
-
-
-
-

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from categories.models import Category,SubCategory
+from categories.models import Category, SubCategory
 
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
@@ -28,11 +28,3 @@ class SubCategorySerializer(serializers.HyperlinkedModelSerializer):
         subcategory = SubCategory.objects.create(category=self.context['category'], **validated_data)
 
         return subcategory
-
-
-
-
-
-
-
-

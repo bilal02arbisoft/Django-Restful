@@ -15,7 +15,8 @@ def api_client():
 @pytest.fixture
 def authenticated_client():
     client = APIClient()
-    user = CustomUser.objects.create_user(email='test@example.com', first_name='Test', last_name='User', password='password123')
+    user = CustomUser.objects.create_user(email='test@example.com', first_name='Test',
+                                          last_name='User', password='password123')
     refresh = RefreshToken.for_user(user)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 

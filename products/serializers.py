@@ -69,9 +69,9 @@ class ProductSerializer(serializers.ModelSerializer):
                     attribute_name = attribute_value_data['attribute']
                     value = attribute_value_data['value']
                     attribute_instance, created = Attribute.objects.get_or_create(name=attribute_name)
-                    attribute_value_instance, created = AttributeValue.objects.get_or_create(attribute=
-                                                                                             attribute_instance,
-                                                                                             value=value)
+                    attribute_value_instance, created = (AttributeValue.objects.
+                                                         get_or_create(attribute=attribute_instance,
+                                                                       value=value))
                     ProductVariantAttribute.objects.create(variant=variant, attribute_value=attribute_value_instance)
 
         return product

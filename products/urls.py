@@ -1,4 +1,4 @@
-from products.views import ProductListView,ProductByCategoryView, ProductBySubCategoryView
+from products.views import ProductListView, ProductByCategoryView, ProductBySubCategoryView
 from django.urls import path
 
 urlpatterns = [

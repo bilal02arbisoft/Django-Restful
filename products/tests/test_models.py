@@ -1,6 +1,5 @@
 import pytest
 from decimal import Decimal
-from django.db.utils import IntegrityError
 from categories.models import SubCategory, Category
 from products.models import Product, Attribute, AttributeValue, ProductVariant, ProductVariantAttribute
 

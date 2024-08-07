@@ -17,7 +17,8 @@ def api_client():
 @pytest.fixture
 def authenticated_client():
     client = APIClient()
-    user = CustomUser.objects.create_user(email='test@example.com', first_name='Test', last_name='User', password='password123')
+    user = CustomUser.objects.create_user(email='test@example.com', first_name='Test',
+                                          last_name='User', password='password123')
     refresh = RefreshToken.for_user(user)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
     return client
@@ -30,7 +31,8 @@ def category():
 
 @pytest.fixture
 def subcategory(category):
-    return SubCategory.objects.create(category=category, name='Smartphones', description='All types of smartphones')
+    return SubCategory.objects.create(category=category, name='Smartphones',
+                                      description='All types of smartphones')
 
 
 @pytest.fixture
@@ -87,13 +89,15 @@ class TestProductBySubCategoryView:
 
     def test_post_product_unauthenticated(self, api_client, subcategory):
         url = reverse('product-by-subcategory', kwargs={'subcategory_id': subcategory.id})
-        data = {'name': 'New Product', 'description': 'New product description', 'price': '199.99', 'subcategory': subcategory.id, 'stock': 20}
+        data = {'name': 'New Product', 'description': 'New product description', 'price': '199.99',
+                'subcategory': subcategory.id, 'stock': 20}
         response = api_client.post(url, data, format='json')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_post_product_authenticated(self, authenticated_client, subcategory):
         url = reverse('product-by-subcategory', kwargs={'subcategory_id': subcategory.id})
-        data = {'name': 'New Product', 'description': 'New product description', 'price': '199.99', 'subcategory': subcategory.id, 'stock': 20}
+        data = {'name': 'New Product', 'description': 'New product description', 'price': '199.99',
+                'subcategory': subcategory.id, 'stock': 20}
         response = authenticated_client.post(url, data, format='json')
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data['name'] == 'New Product'

@@ -6,7 +6,8 @@ from django.db import IntegrityError
 
 @pytest.fixture
 def custom_user(db):
-    user = CustomUser.objects.create_user(email='test@example.com', first_name='Test', last_name='User', password='password123')
+    user = CustomUser.objects.create_user(email='test@example.com', first_name='Test',
+                                          last_name='User', password='password123')
     return user
 
 

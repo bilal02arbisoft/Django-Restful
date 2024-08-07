@@ -83,7 +83,7 @@ class LogoutView(APIView):
             token.blacklist()
 
             return Response("Logged out successfully", status=status.HTTP_205_RESET_CONTENT)
-        except Exception as e:
+        except Exception:
 
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -104,7 +104,6 @@ class UserProfileEditView(APIView):
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
 
-            updated_instance = serializer.save()
             response_data = {
                 "message": "Successfully Updated the Profile",
                 "Profile:": serializer.data
@@ -143,17 +142,3 @@ class PasswordChangeView(APIView):
             if user.pk == session_data.get('_auth_user_id'):
 
                 session.delete()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

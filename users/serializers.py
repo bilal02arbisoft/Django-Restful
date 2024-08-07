@@ -148,10 +148,3 @@ def plain_password_equals_email(password, email):
 def plain_password_equals_user_name(password, first_name):
 
     return password == first_name
-
-
-
-
-
-
-

@@ -10,7 +10,8 @@ from categories.models import Category, SubCategory
 class TestOrderModels:
 
     def test_create_order(self):
-        user = User.objects.create_user(email='test@example.com', password='password123', first_name='new', last_name='user')
+        user = User.objects.create_user(email='test@example.com', password='password123',
+                                        first_name='new', last_name='user')
         order = Order.objects.create(user=user, total_price=100.00)
         assert order.user == user
         assert order.status == 'pending'
@@ -18,10 +19,12 @@ class TestOrderModels:
         assert str(order) == f"Order {order.id} - {user.first_name}"
 
     def test_create_order_item(self):
-        user = User.objects.create_user(email='test@example.com', password='password123', first_name='new', last_name='user')
+        user = User.objects.create_user(email='test@example.com', password='password123',
+                                        first_name='new', last_name='user')
         category = Category.objects.create(name="Electronics", description="Electronics Category")
         subcategory = SubCategory.objects.create(name="Mobile Phones", category=category)
-        product = Product.objects.create(name="iPhone", description="iPhone 12", price=999.99, subcategory=subcategory, stock=10)
+        product = Product.objects.create(name="iPhone", description="iPhone 12",
+                                         price=999.99, subcategory=subcategory, stock=10)
         variant = ProductVariant.objects.create(product=product, sku="12345", price=999.99, stock=5)
         order = Order.objects.create(user=user, total_price=100.00)
         order_item = OrderItem.objects.create(order=order, variant=variant, quantity=2, unit_price=999.99)
@@ -33,7 +36,8 @@ class TestOrderModels:
         assert str(order_item) == f"OrderItem {order_item.id} - Order {order.id}"
 
     def test_order_status_choices(self):
-        user = User.objects.create_user(email='test@example.com', password='password123', first_name='new', last_name='user')
+        user = User.objects.create_user(email='test@example.com', password='password123',
+                                        first_name='new', last_name='user')
         order = Order.objects.create(user=user, total_price=100.00)
         order.status = 'shipped'
         order.save()
@@ -47,5 +51,3 @@ class TestOrderModels:
         with pytest.raises(ValidationError):
             order.status = 'invalid_status'
             order.full_clean()
-
-
